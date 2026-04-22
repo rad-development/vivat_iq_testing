@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">report.html</h1>
+    <p>Report generated on 17-Apr-2026 at 01:06:42 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.2.0</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</td>
+        </tr>
+      </tbody>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left">&lt;</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">&gt;</div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">9 tests took 00:01:11.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" >
+            <span class="failed">2 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
+            <span class="passed">7 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled>
+            <span class="rerun">0 Reruns</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="retried" disabled>
+            <span class="retried">0 Retried,</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.12.0&#34;, &#34;Platform&#34;: &#34;Windows-10-10.0.19045-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;7.4.4&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;allure-pytest&#34;: &#34;2.13.5&#34;, &#34;check&#34;: &#34;2.7.6&#34;, &#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;xdist&#34;: &#34;3.5.0&#34;}}, &#34;tests&#34;: {&#34;tests/test_cases/cart_total_price/test_cart_total_price.py::TestCartTotalPrice::test_cart_total_price&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cases/cart_total_price/test_cart_total_price.py::TestCartTotalPrice::test_cart_total_price&#34;, &#34;duration&#34;: &#34;00:00:09&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/cart_total_price/test_cart_total_price.py::TestCartTotalPrice::test_cart_total_price&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:09&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:05:31,314 [root] [INFO ]  Setting work_dir: D:\\practice_project\\vivat_int\\project\\tests\n2026-04-17 01:05:31,314 [root] [INFO ]  Environment ready\n2026-04-17 01:05:31,314 [root] [INFO ]  Loading config from D:\\practice_project\\vivat_int\\project\\tests/config/config.json\n2026-04-17 01:05:31,314 [root] [DEBUG]  Get settings from: settings.json\n2026-04-17 01:05:31,314 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:05:31,809 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:32,183 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:32,593 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:05:32,604 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:05:32,604 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 19180 using 0 to output -3\n2026-04-17 01:05:33,673 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:05:33,673 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:05:33,700 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:05:34,870 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:05:34,899 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     root:logger.py:30 Setting work_dir: D:\\practice_project\\vivat_int\\project\\tests\nINFO     root:logger.py:30 Environment ready\nINFO     root:logger.py:30 Loading config from D:\\practice_project\\vivat_int\\project\\tests/config/config.json\nDEBUG    root:logger.py:40 Get settings from: settings.json\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 19180 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:05:34,906 [root] [INFO ]  Loading test data from file: path=&amp;#x27;D:\\practice_project\\vivat_int\\project\\tests\\test_cases\\cart_total_price\\cart_test_data.json&amp;#x27;, model=&amp;#x27;CartDataModel&amp;#x27;\n2026-04-17 01:05:34,907 [root] [INFO ]  Step 1: Verify that the cart icon displays 0 items\n2026-04-17 01:05:34,907 [root] [INFO ]  Label &amp;#x27;Cart item counter&amp;#x27; :: Getting text from element\n2026-04-17 01:05:34,970 [root] [INFO ]  Label &amp;#x27;Cart item counter&amp;#x27; :: Element&amp;#x27;s text: [0]\n2026-04-17 01:05:34,970 [root] [INFO ]  Step 2: Click on the cart icon and verify that the cart page is opened\n2026-04-17 01:05:34,970 [root] [INFO ]  Link &amp;#x27;Cart&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:35,001 [root] [INFO ]  Link &amp;#x27;Cart&amp;#x27; :: Clicking\n2026-04-17 01:05:35,186 [root] [INFO ]  Refreshing the page\n2026-04-17 01:05:35,372 [root] [INFO ]  Step 3: Verify that the empty cart message is displayed\n2026-04-17 01:05:35,385 [root] [INFO ]  Label &amp;#x27;empty basket message&amp;#x27; :: Getting text from element\n2026-04-17 01:05:35,405 [root] [INFO ]  Label &amp;#x27;empty basket message&amp;#x27; :: Element&amp;#x27;s text: [\u0412\u0430\u0448\u0430 \u043a\u043e\u0440\u0437\u0438\u043d\u0430 \u043f\u0443\u0441\u0442\u0430\n\u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u044d\u0442\u043e \u043f\u0440\u043e\u0441\u0442\u043e: \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432 \u043a\u0430\u0442\u0430\u043b\u043e\u0433\u0435 \u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u044e\u0449\u0438\u0439 \u0442\u043e\u0432\u0430\u0440 \u0438 \u043d\u0430\u0436\u043c\u0438\u0442\u0435 \u043a\u043d\u043e\u043f\u043a\u0443 \u00ab\u0412 \u043a\u043e\u0440\u0437\u0438\u043d\u0443\u00bb\n\u0412 \u041a\u0410\u0422\u0410\u041b\u041e\u0413]\n2026-04-17 01:05:35,405 [root] [INFO ]  Step 4: Click &amp;#x27;Go to catalog&amp;#x27; and verify navigation to the Solutions page\n2026-04-17 01:05:35,405 [root] [INFO ]  Button &amp;#x27;Go to catalog&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:35,447 [root] [INFO ]  Button &amp;#x27;Go to catalog&amp;#x27; :: Clicking\n2026-04-17 01:05:35,637 [root] [INFO ]  Step 5: Select product group and add a product with the specified quantity to the cart\n2026-04-17 01:05:35,637 [root] [INFO ]  Link &amp;#x27;Solution card with text=\u0422\u043e\u0440\u0433\u043e\u0432\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:35,646 [root] [INFO ]  Link &amp;#x27;Solution card with text=\u0422\u043e\u0440\u0433\u043e\u0432\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f&amp;#x27; :: Clicking\n2026-04-17 01:05:35,876 [root] [INFO ]  Link &amp;#x27;Product card with name=1\u0421:\u0420\u043e\u0437\u043d\u0438\u0446\u0430 8 \u041f\u0420\u041e\u0424&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:35,889 [root] [INFO ]  Link &amp;#x27;Product card with name=1\u0421:\u0420\u043e\u0437\u043d\u0438\u0446\u0430 8 \u041f\u0420\u041e\u0424&amp;#x27; :: Clicking\n2026-04-17 01:05:36,455 [root] [INFO ]  Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:36,470 [root] [INFO ]  Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Clicking\n2026-04-17 01:05:36,530 [root] [INFO ]  Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Sending keys &amp;#x27;\ue009a&amp;#x27;\n--- Logging error ---\nTraceback (most recent call last):\n  File &amp;quot;C:\\Users\\Radmir\\.pyenv\\pyenv-win\\versions\\3.12.0\\Lib\\logging\\__init__.py&amp;quot;, line 1163, in emit\n    stream.write(msg + self.terminator)\n  File &amp;quot;C:\\Users\\Radmir\\.pyenv\\pyenv-win\\versions\\3.12.0\\Lib\\encodings\\cp1251.py&amp;quot;, line 19, in encode\n    return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nUnicodeEncodeError: &amp;#x27;charmap&amp;#x27; codec can&amp;#x27;t encode character &amp;#x27;\\ue009&amp;#x27; in position 97: character maps to &amp;lt;undefined&amp;gt;\nCall stack:\n  File &amp;quot;&amp;lt;frozen runpy&amp;gt;&amp;quot;, line 198, in _run_module_as_main\n  File &amp;quot;&amp;lt;frozen runpy&amp;gt;&amp;quot;, line 88, in _run_code\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Scripts\\pytest.exe\\__main__.py&amp;quot;, line 7, in &amp;lt;module&amp;gt;\n    sys.exit(console_main())\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\config\\__init__.py&amp;quot;, line 192, in console_main\n    code = main()\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\config\\__init__.py&amp;quot;, line 169, in main\n    ret: Union[ExitCode, int] = config.hook.pytest_cmdline_main(\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_hooks.py&amp;quot;, line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_manager.py&amp;quot;, line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_callers.py&amp;quot;, line 121, in _multicall\n    res = hook_impl.function(*args)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\main.py&amp;quot;, line 318, in pytest_cmdline_main\n    return wrap_session(config, _main)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\main.py&amp;quot;, line 271, in wrap_session\n    session.exitstatus = doit(config, session) or 0\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\main.py&amp;quot;, line 325, in _main\n    config.hook.pytest_runtestloop(session=session)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_hooks.py&amp;quot;, line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_manager.py&amp;quot;, line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_callers.py&amp;quot;, line 121, in _multicall\n    res = hook_impl.function(*args)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\main.py&amp;quot;, line 350, in pytest_runtestloop\n    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_hooks.py&amp;quot;, line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_manager.py&amp;quot;, line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_callers.py&amp;quot;, line 121, in _multicall\n    res = hook_impl.function(*args)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\runner.py&amp;quot;, line 114, in pytest_runtest_protocol\n    runtestprotocol(item, nextitem=nextitem)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\runner.py&amp;quot;, line 133, in runtestprotocol\n    reports.append(call_and_report(item, &amp;quot;call&amp;quot;, log))\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\runner.py&amp;quot;, line 222, in call_and_report\n    call = call_runtest_hook(item, when, **kwds)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\runner.py&amp;quot;, line 261, in call_runtest_hook\n    return CallInfo.from_call(\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\runner.py&amp;quot;, line 341, in from_call\n    result: Optional[TResult] = func()\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\runner.py&amp;quot;, line 262, in &amp;lt;lambda&amp;gt;\n    lambda: ihook(item=item, **kwds), when=when, reraise=reraise\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_hooks.py&amp;quot;, line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_manager.py&amp;quot;, line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_callers.py&amp;quot;, line 121, in _multicall\n    res = hook_impl.function(*args)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\runner.py&amp;quot;, line 169, in pytest_runtest_call\n    item.runtest()\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\python.py&amp;quot;, line 1792, in runtest\n    self.ihook.pytest_pyfunc_call(pyfuncitem=self)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_hooks.py&amp;quot;, line 512, in __call__\n    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_manager.py&amp;quot;, line 120, in _hookexec\n    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\pluggy\\_callers.py&amp;quot;, line 121, in _multicall\n    res = hook_impl.function(*args)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\_pytest\\python.py&amp;quot;, line 194, in pytest_pyfunc_call\n    result = testfunction(**testargs)\n  File &amp;quot;d:\\practice_project\\vivat_int\\project\\tests\\test_cases\\cart_total_price\\test_cart_total_price.py&amp;quot;, line 56, in test_cart_total_price\n    product_page.wait_and_set_product_amount_to(test_data.amount_of_product)\n  File &amp;quot;D:\\practice_project\\vivat_int\\project\\tests\\pages\\product_page.py&amp;quot;, line 33, in wait_and_set_product_amount_to\n    element.send_keys(Keys.CONTROL + &amp;quot;a&amp;quot;)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\py_selenium_auto_core\\elements\\core_element.py&amp;quot;, line 247, in send_keys\n    self.log_element_action(&amp;quot;loc.text.sending.keys&amp;quot;, value)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\py_selenium_auto_core\\elements\\core_element.py&amp;quot;, line 254, in log_element_action\n    self.localized_logger.info_element_action(self.element_type, self.name, message_key, *args)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\py_selenium_auto_core\\localization\\localized_logger.py&amp;quot;, line 21, in info_element_action\n    self.__logger.info(f&amp;quot;{element_type} &amp;#x27;{element_name}&amp;#x27; :: {localized_message}&amp;quot;)\n  File &amp;quot;D:\\practice_project\\vivat_int\\my_venv\\Lib\\site-packages\\py_selenium_auto_core\\logging\\logger.py&amp;quot;, line 30, in info\n    cls._instance().info(msg, *args)\nMessage: &amp;quot;Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Sending keys &amp;#x27;\\ue009a&amp;#x27;&amp;quot;\nArguments: ()\n2026-04-17 01:05:36,563 [root] [INFO ]  Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Sending keys &amp;#x27;5&amp;#x27;\n2026-04-17 01:05:36,577 [root] [INFO ]  Button &amp;#x27;Add product to cart&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:36,591 [root] [INFO ]  Button &amp;#x27;Add product to cart&amp;#x27; :: Clicking\n2026-04-17 01:05:36,952 [root] [INFO ]  Label &amp;#x27;Cart item counter&amp;#x27; :: Getting text from element\n2026-04-17 01:05:36,966 [root] [INFO ]  Label &amp;#x27;Cart item counter&amp;#x27; :: Element&amp;#x27;s text: [1]\n2026-04-17 01:05:36,966 [root] [INFO ]  Step 6: Open the cart page\n2026-04-17 01:05:36,966 [root] [INFO ]  Link &amp;#x27;Cart&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:36,973 [root] [INFO ]  Link &amp;#x27;Cart&amp;#x27; :: Clicking\n2026-04-17 01:05:37,109 [root] [INFO ]  Step 7: Verify product details in the cart (name and quantity)\n2026-04-17 01:05:37,448 [root] [INFO ]  Label &amp;#x27;Item name&amp;#x27; :: Getting text from element\n2026-04-17 01:05:37,470 [root] [INFO ]  Label &amp;#x27;Item name&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0420\u043e\u0437\u043d\u0438\u0446\u0430 8 \u041f\u0420\u041e\u0424]\n2026-04-17 01:05:37,470 [root] [INFO ]  Label &amp;#x27;Item price for single&amp;#x27; :: Getting text from element\n2026-04-17 01:05:37,491 [root] [INFO ]  Label &amp;#x27;Item price for single&amp;#x27; :: Element&amp;#x27;s text: [20 100 \u0420]\n2026-04-17 01:05:37,491 [root] [INFO ]  Label &amp;#x27;Item total price&amp;#x27; :: Getting text from element\n2026-04-17 01:05:37,515 [root] [INFO ]  Label &amp;#x27;Item total price&amp;#x27; :: Element&amp;#x27;s text: [100 500]\n2026-04-17 01:05:37,515 [root] [INFO ]  Label &amp;#x27;Item count&amp;#x27; :: Getting attribute &amp;#x27;value&amp;#x27;\n2026-04-17 01:05:37,539 [root] [INFO ]  Label &amp;#x27;Item count&amp;#x27; :: Value of attribute &amp;#x27;value&amp;#x27;: [5]\n2026-04-17 01:05:37,539 [root] [INFO ]  Step 8: Verify item total price and overall cart total price\n2026-04-17 01:05:37,539 [root] [INFO ]  Label &amp;#x27;Total price of all items in the cart&amp;#x27; :: Getting text from element\n2026-04-17 01:05:37,557 [root] [INFO ]  Label &amp;#x27;Total price of all items in the cart&amp;#x27; :: Element&amp;#x27;s text: [100 500]\n2026-04-17 01:05:37,557 [root] [INFO ]  Step 9: Clear the cart and verify that it is empty\n2026-04-17 01:05:37,557 [root] [INFO ]  Button &amp;#x27;Remove all items from cart&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:37,568 [root] [INFO ]  Button &amp;#x27;Remove all items from cart&amp;#x27; :: Clicking\n2026-04-17 01:05:37,924 [root] [INFO ]  Label &amp;#x27;empty basket message&amp;#x27; :: Getting text from element\n2026-04-17 01:05:37,942 [root] [INFO ]  Label &amp;#x27;empty basket message&amp;#x27; :: Element&amp;#x27;s text: [\u0412\u0430\u0448\u0430 \u043a\u043e\u0440\u0437\u0438\u043d\u0430 \u043f\u0443\u0441\u0442\u0430\n\u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u044d\u0442\u043e \u043f\u0440\u043e\u0441\u0442\u043e: \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432 \u043a\u0430\u0442\u0430\u043b\u043e\u0433\u0435 \u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u044e\u0449\u0438\u0439 \u0442\u043e\u0432\u0430\u0440 \u0438 \u043d\u0430\u0436\u043c\u0438\u0442\u0435 \u043a\u043d\u043e\u043f\u043a\u0443 \u00ab\u0412 \u043a\u043e\u0440\u0437\u0438\u043d\u0443\u00bb\n\u0412 \u041a\u0410\u0422\u0410\u041b\u041e\u0413]\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Loading test data from file: path=&amp;#x27;D:\\practice_project\\vivat_int\\project\\tests\\test_cases\\cart_total_price\\cart_test_data.json&amp;#x27;, model=&amp;#x27;CartDataModel&amp;#x27;\nINFO     root:logger.py:30 Step 1: Verify that the cart icon displays 0 items\nINFO     root:logger.py:30 Label &amp;#x27;Cart item counter&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Cart item counter&amp;#x27; :: Element&amp;#x27;s text: [0]\nINFO     root:logger.py:30 Step 2: Click on the cart icon and verify that the cart page is opened\nINFO     root:logger.py:30 Link &amp;#x27;Cart&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Cart&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Refreshing the page\nINFO     root:logger.py:30 Step 3: Verify that the empty cart message is displayed\nINFO     root:logger.py:30 Label &amp;#x27;empty basket message&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;empty basket message&amp;#x27; :: Element&amp;#x27;s text: [\u0412\u0430\u0448\u0430 \u043a\u043e\u0440\u0437\u0438\u043d\u0430 \u043f\u0443\u0441\u0442\u0430\n\u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u044d\u0442\u043e \u043f\u0440\u043e\u0441\u0442\u043e: \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432 \u043a\u0430\u0442\u0430\u043b\u043e\u0433\u0435 \u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u044e\u0449\u0438\u0439 \u0442\u043e\u0432\u0430\u0440 \u0438 \u043d\u0430\u0436\u043c\u0438\u0442\u0435 \u043a\u043d\u043e\u043f\u043a\u0443 \u00ab\u0412 \u043a\u043e\u0440\u0437\u0438\u043d\u0443\u00bb\n\u0412 \u041a\u0410\u0422\u0410\u041b\u041e\u0413]\nINFO     root:logger.py:30 Step 4: Click &amp;#x27;Go to catalog&amp;#x27; and verify navigation to the Solutions page\nINFO     root:logger.py:30 Button &amp;#x27;Go to catalog&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Go to catalog&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 5: Select product group and add a product with the specified quantity to the cart\nINFO     root:logger.py:30 Link &amp;#x27;Solution card with text=\u0422\u043e\u0440\u0433\u043e\u0432\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Solution card with text=\u0422\u043e\u0440\u0433\u043e\u0432\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Link &amp;#x27;Product card with name=1\u0421:\u0420\u043e\u0437\u043d\u0438\u0446\u0430 8 \u041f\u0420\u041e\u0424&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Product card with name=1\u0421:\u0420\u043e\u0437\u043d\u0438\u0446\u0430 8 \u041f\u0420\u041e\u0424&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Sending keys &amp;#x27;\ue009a&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;Selected amount of product&amp;#x27; :: Sending keys &amp;#x27;5&amp;#x27;\nINFO     root:logger.py:30 Button &amp;#x27;Add product to cart&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Add product to cart&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Label &amp;#x27;Cart item counter&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Cart item counter&amp;#x27; :: Element&amp;#x27;s text: [1]\nINFO     root:logger.py:30 Step 6: Open the cart page\nINFO     root:logger.py:30 Link &amp;#x27;Cart&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Cart&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 7: Verify product details in the cart (name and quantity)\nINFO     root:logger.py:30 Label &amp;#x27;Item name&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Item name&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0420\u043e\u0437\u043d\u0438\u0446\u0430 8 \u041f\u0420\u041e\u0424]\nINFO     root:logger.py:30 Label &amp;#x27;Item price for single&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Item price for single&amp;#x27; :: Element&amp;#x27;s text: [20 100 \u0420]\nINFO     root:logger.py:30 Label &amp;#x27;Item total price&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Item total price&amp;#x27; :: Element&amp;#x27;s text: [100 500]\nINFO     root:logger.py:30 Label &amp;#x27;Item count&amp;#x27; :: Getting attribute &amp;#x27;value&amp;#x27;\nINFO     root:logger.py:30 Label &amp;#x27;Item count&amp;#x27; :: Value of attribute &amp;#x27;value&amp;#x27;: [5]\nINFO     root:logger.py:30 Step 8: Verify item total price and overall cart total price\nINFO     root:logger.py:30 Label &amp;#x27;Total price of all items in the cart&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Total price of all items in the cart&amp;#x27; :: Element&amp;#x27;s text: [100 500]\nINFO     root:logger.py:30 Step 9: Clear the cart and verify that it is empty\nINFO     root:logger.py:30 Button &amp;#x27;Remove all items from cart&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Remove all items from cart&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Label &amp;#x27;empty basket message&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;empty basket message&amp;#x27; :: Element&amp;#x27;s text: [\u0412\u0430\u0448\u0430 \u043a\u043e\u0440\u0437\u0438\u043d\u0430 \u043f\u0443\u0441\u0442\u0430\n\u0418\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u044d\u0442\u043e \u043f\u0440\u043e\u0441\u0442\u043e: \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432 \u043a\u0430\u0442\u0430\u043b\u043e\u0433\u0435 \u0438\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u044e\u0449\u0438\u0439 \u0442\u043e\u0432\u0430\u0440 \u0438 \u043d\u0430\u0436\u043c\u0438\u0442\u0435 \u043a\u043d\u043e\u043f\u043a\u0443 \u00ab\u0412 \u043a\u043e\u0440\u0437\u0438\u043d\u0443\u00bb\n\u0412 \u041a\u0410\u0422\u0410\u041b\u041e\u0413]\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:05:37,943 [root] [INFO ]  Closing browser\n2026-04-17 01:05:37,943 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user0]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user0]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user0]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:05:40,023 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:05:40,494 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:40,862 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:41,253 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:05:41,253 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:05:41,253 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 18100 using 0 to output -3\n2026-04-17 01:05:42,316 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:05:42,316 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:05:42,352 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:05:43,620 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:05:43,655 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 18100 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:05:43,656 [root] [INFO ]  Step 1: Verify that &amp;#x27;Services&amp;#x27; and &amp;#x27;Projects&amp;#x27; blocks are displayed on the homepage\n2026-04-17 01:05:43,856 [root] [INFO ]  Step 2: Click the &amp;#x27;Start Cooperation&amp;#x27; button in the &amp;#x27;About Company&amp;#x27; block\n2026-04-17 01:05:43,856 [root] [INFO ]  Button &amp;#x27;Start cooperation&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:43,866 [root] [INFO ]  Button &amp;#x27;Start cooperation&amp;#x27; :: Clicking\n2026-04-17 01:05:43,948 [root] [INFO ]  Step 3: Fill out the &amp;#x27;Start Cooperation&amp;#x27; form with name, phone, service, and message\n2026-04-17 01:05:44,579 [root] [INFO ]  Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Oleg Ivanov&amp;#x27;\n2026-04-17 01:05:44,627 [root] [INFO ]  Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;1234567890&amp;#x27;\n2026-04-17 01:05:44,668 [root] [INFO ]  Text Field &amp;#x27;Needed service name&amp;#x27; :: Sending keys &amp;#x27;1\u0421:\u041a\u043e\u043c\u043f\u043b\u0435\u043a\u0441\u043d\u0430\u044f \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0437\u0430\u0446\u0438\u044f 8.&amp;#x27;\n2026-04-17 01:05:44,714 [root] [INFO ]  Text Field &amp;#x27;User message&amp;#x27; :: Sending keys &amp;#x27;\u041d\u0443\u0436\u043d\u0430 \u043a\u043e\u043d\u0441\u0443\u043b\u044c\u0442\u0430\u0446\u0438\u044f \u043f\u043e \u0443\u0441\u043b\u0443\u0433\u0435 1\u0421:\u041a\u043e\u043c\u043f\u043b\u0435\u043a\u0441\u043d\u0430\u044f \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0437\u0430\u0446\u0438\u044f 8.&amp;#x27;\n2026-04-17 01:05:44,780 [root] [INFO ]  Step 4: Click the &amp;#x27;Request Callback&amp;#x27; button in the &amp;#x27;Start Cooperation&amp;#x27; form\n2026-04-17 01:05:44,780 [root] [INFO ]  Button &amp;#x27;Callback&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:44,793 [root] [INFO ]  Button &amp;#x27;Callback&amp;#x27; :: Clicking\n2026-04-17 01:05:45,464 [root] [DEBUG]  No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_question&amp;#x27;]&amp;#x27; were found in Displayed state\n2026-04-17 01:05:45,464 [root] [INFO ]  Step 5: Fill out the &amp;#x27;Callback&amp;#x27; form with name and phone\n2026-04-17 01:05:45,473 [root] [INFO ]  Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Oleg Ivanov&amp;#x27;\n2026-04-17 01:05:45,508 [root] [INFO ]  Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;1234567890&amp;#x27;\n2026-04-17 01:05:45,541 [root] [INFO ]  Step 6: Close the &amp;#x27;Callback&amp;#x27; form using the close button\n2026-04-17 01:05:45,541 [root] [INFO ]  Button &amp;#x27;Close side form&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:45,550 [root] [INFO ]  Button &amp;#x27;Close side form&amp;#x27; :: Clicking\n2026-04-17 01:05:46,210 [root] [DEBUG]  No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_callback&amp;#x27;]&amp;#x27; were found in Displayed state\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Verify that &amp;#x27;Services&amp;#x27; and &amp;#x27;Projects&amp;#x27; blocks are displayed on the homepage\nINFO     root:logger.py:30 Step 2: Click the &amp;#x27;Start Cooperation&amp;#x27; button in the &amp;#x27;About Company&amp;#x27; block\nINFO     root:logger.py:30 Button &amp;#x27;Start cooperation&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Start cooperation&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 3: Fill out the &amp;#x27;Start Cooperation&amp;#x27; form with name, phone, service, and message\nINFO     root:logger.py:30 Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Oleg Ivanov&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;1234567890&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;Needed service name&amp;#x27; :: Sending keys &amp;#x27;1\u0421:\u041a\u043e\u043c\u043f\u043b\u0435\u043a\u0441\u043d\u0430\u044f \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0437\u0430\u0446\u0438\u044f 8.&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User message&amp;#x27; :: Sending keys &amp;#x27;\u041d\u0443\u0436\u043d\u0430 \u043a\u043e\u043d\u0441\u0443\u043b\u044c\u0442\u0430\u0446\u0438\u044f \u043f\u043e \u0443\u0441\u043b\u0443\u0433\u0435 1\u0421:\u041a\u043e\u043c\u043f\u043b\u0435\u043a\u0441\u043d\u0430\u044f \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0437\u0430\u0446\u0438\u044f 8.&amp;#x27;\nINFO     root:logger.py:30 Step 4: Click the &amp;#x27;Request Callback&amp;#x27; button in the &amp;#x27;Start Cooperation&amp;#x27; form\nINFO     root:logger.py:30 Button &amp;#x27;Callback&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Callback&amp;#x27; :: Clicking\nDEBUG    root:logger.py:40 No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_question&amp;#x27;]&amp;#x27; were found in Displayed state\nINFO     root:logger.py:30 Step 5: Fill out the &amp;#x27;Callback&amp;#x27; form with name and phone\nINFO     root:logger.py:30 Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Oleg Ivanov&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;1234567890&amp;#x27;\nINFO     root:logger.py:30 Step 6: Close the &amp;#x27;Callback&amp;#x27; form using the close button\nINFO     root:logger.py:30 Button &amp;#x27;Close side form&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Close side form&amp;#x27; :: Clicking\nDEBUG    root:logger.py:40 No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_callback&amp;#x27;]&amp;#x27; were found in Displayed state\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:05:46,210 [root] [INFO ]  Closing browser\n2026-04-17 01:05:46,211 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user1]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:05:48,308 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:05:48,789 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:49,132 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:49,501 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:05:49,501 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:05:49,501 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 21124 using 0 to output -3\n2026-04-17 01:05:50,060 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:05:50,060 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:05:50,096 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:05:51,562 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:05:51,566 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 21124 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:05:51,566 [root] [INFO ]  Step 1: Verify that &amp;#x27;Services&amp;#x27; and &amp;#x27;Projects&amp;#x27; blocks are displayed on the homepage\n2026-04-17 01:05:51,749 [root] [INFO ]  Step 2: Click the &amp;#x27;Start Cooperation&amp;#x27; button in the &amp;#x27;About Company&amp;#x27; block\n2026-04-17 01:05:51,749 [root] [INFO ]  Button &amp;#x27;Start cooperation&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:51,764 [root] [INFO ]  Button &amp;#x27;Start cooperation&amp;#x27; :: Clicking\n2026-04-17 01:05:51,837 [root] [INFO ]  Step 3: Fill out the &amp;#x27;Start Cooperation&amp;#x27; form with name, phone, service, and message\n2026-04-17 01:05:52,459 [root] [INFO ]  Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Anna Petrova&amp;#x27;\n2026-04-17 01:05:52,501 [root] [INFO ]  Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;9876543210&amp;#x27;\n2026-04-17 01:05:52,543 [root] [INFO ]  Text Field &amp;#x27;Needed service name&amp;#x27; :: Sending keys &amp;#x27;1\u0421:\u0411\u0443\u0445\u0433\u0430\u043b\u0442\u0435\u0440\u0438\u044f 8&amp;#x27;\n2026-04-17 01:05:52,584 [root] [INFO ]  Text Field &amp;#x27;User message&amp;#x27; :: Sending keys &amp;#x27;\u0418\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u0435\u0442 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 \u0438 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0430 1\u0421:\u0411\u0443\u0445\u0433\u0430\u043b\u0442\u0435\u0440\u0438\u044f 8&amp;#x27;\n2026-04-17 01:05:52,643 [root] [INFO ]  Step 4: Click the &amp;#x27;Request Callback&amp;#x27; button in the &amp;#x27;Start Cooperation&amp;#x27; form\n2026-04-17 01:05:52,643 [root] [INFO ]  Button &amp;#x27;Callback&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:52,659 [root] [INFO ]  Button &amp;#x27;Callback&amp;#x27; :: Clicking\n2026-04-17 01:05:53,336 [root] [DEBUG]  No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_question&amp;#x27;]&amp;#x27; were found in Displayed state\n2026-04-17 01:05:53,336 [root] [INFO ]  Step 5: Fill out the &amp;#x27;Callback&amp;#x27; form with name and phone\n2026-04-17 01:05:53,344 [root] [INFO ]  Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Anna Petrova&amp;#x27;\n2026-04-17 01:05:53,377 [root] [INFO ]  Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;9876543210&amp;#x27;\n2026-04-17 01:05:53,411 [root] [INFO ]  Step 6: Close the &amp;#x27;Callback&amp;#x27; form using the close button\n2026-04-17 01:05:53,411 [root] [INFO ]  Button &amp;#x27;Close side form&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:53,422 [root] [INFO ]  Button &amp;#x27;Close side form&amp;#x27; :: Clicking\n2026-04-17 01:05:54,080 [root] [DEBUG]  No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_callback&amp;#x27;]&amp;#x27; were found in Displayed state\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Verify that &amp;#x27;Services&amp;#x27; and &amp;#x27;Projects&amp;#x27; blocks are displayed on the homepage\nINFO     root:logger.py:30 Step 2: Click the &amp;#x27;Start Cooperation&amp;#x27; button in the &amp;#x27;About Company&amp;#x27; block\nINFO     root:logger.py:30 Button &amp;#x27;Start cooperation&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Start cooperation&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 3: Fill out the &amp;#x27;Start Cooperation&amp;#x27; form with name, phone, service, and message\nINFO     root:logger.py:30 Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Anna Petrova&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;9876543210&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;Needed service name&amp;#x27; :: Sending keys &amp;#x27;1\u0421:\u0411\u0443\u0445\u0433\u0430\u043b\u0442\u0435\u0440\u0438\u044f 8&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User message&amp;#x27; :: Sending keys &amp;#x27;\u0418\u043d\u0442\u0435\u0440\u0435\u0441\u0443\u0435\u0442 \u043e\u0431\u0443\u0447\u0435\u043d\u0438\u0435 \u0438 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0430 1\u0421:\u0411\u0443\u0445\u0433\u0430\u043b\u0442\u0435\u0440\u0438\u044f 8&amp;#x27;\nINFO     root:logger.py:30 Step 4: Click the &amp;#x27;Request Callback&amp;#x27; button in the &amp;#x27;Start Cooperation&amp;#x27; form\nINFO     root:logger.py:30 Button &amp;#x27;Callback&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Callback&amp;#x27; :: Clicking\nDEBUG    root:logger.py:40 No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_question&amp;#x27;]&amp;#x27; were found in Displayed state\nINFO     root:logger.py:30 Step 5: Fill out the &amp;#x27;Callback&amp;#x27; form with name and phone\nINFO     root:logger.py:30 Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Anna Petrova&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;9876543210&amp;#x27;\nINFO     root:logger.py:30 Step 6: Close the &amp;#x27;Callback&amp;#x27; form using the close button\nINFO     root:logger.py:30 Button &amp;#x27;Close side form&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Close side form&amp;#x27; :: Clicking\nDEBUG    root:logger.py:40 No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_callback&amp;#x27;]&amp;#x27; were found in Displayed state\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:05:54,081 [root] [INFO ]  Closing browser\n2026-04-17 01:05:54,081 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user2]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user2]&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/home_page_coop_form/test_home_page_coop_form.py::TestHomePageCoopForm::test_home_page_coop_form[user2]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:05:56,172 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:05:56,651 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:57,026 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:05:57,411 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:05:57,411 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:05:57,427 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 13808 using 0 to output -3\n2026-04-17 01:05:58,463 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:05:58,464 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:05:58,493 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:05:59,674 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:05:59,706 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 13808 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:05:59,712 [root] [INFO ]  Step 1: Verify that &amp;#x27;Services&amp;#x27; and &amp;#x27;Projects&amp;#x27; blocks are displayed on the homepage\n2026-04-17 01:05:59,935 [root] [INFO ]  Step 2: Click the &amp;#x27;Start Cooperation&amp;#x27; button in the &amp;#x27;About Company&amp;#x27; block\n2026-04-17 01:05:59,935 [root] [INFO ]  Button &amp;#x27;Start cooperation&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:05:59,948 [root] [INFO ]  Button &amp;#x27;Start cooperation&amp;#x27; :: Clicking\n2026-04-17 01:06:00,057 [root] [INFO ]  Step 3: Fill out the &amp;#x27;Start Cooperation&amp;#x27; form with name, phone, service, and message\n2026-04-17 01:06:00,679 [root] [INFO ]  Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Ivan Sidorov&amp;#x27;\n2026-04-17 01:06:00,722 [root] [INFO ]  Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;5551234567&amp;#x27;\n2026-04-17 01:06:00,762 [root] [INFO ]  Text Field &amp;#x27;Needed service name&amp;#x27; :: Sending keys &amp;#x27;1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b 8&amp;#x27;\n2026-04-17 01:06:00,805 [root] [INFO ]  Text Field &amp;#x27;User message&amp;#x27; :: Sending keys &amp;#x27;\u0425\u043e\u0447\u0443 \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u043a\u043e\u043d\u0441\u0443\u043b\u044c\u0442\u0430\u0446\u0438\u044e \u043f\u043e \u0432\u043d\u0435\u0434\u0440\u0435\u043d\u0438\u044e 1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b 8&amp;#x27;\n2026-04-17 01:06:00,874 [root] [INFO ]  Step 4: Click the &amp;#x27;Request Callback&amp;#x27; button in the &amp;#x27;Start Cooperation&amp;#x27; form\n2026-04-17 01:06:00,874 [root] [INFO ]  Button &amp;#x27;Callback&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:00,889 [root] [INFO ]  Button &amp;#x27;Callback&amp;#x27; :: Clicking\n2026-04-17 01:06:01,563 [root] [DEBUG]  No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_question&amp;#x27;]&amp;#x27; were found in Displayed state\n2026-04-17 01:06:01,563 [root] [INFO ]  Step 5: Fill out the &amp;#x27;Callback&amp;#x27; form with name and phone\n2026-04-17 01:06:01,572 [root] [INFO ]  Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Ivan Sidorov&amp;#x27;\n2026-04-17 01:06:01,606 [root] [INFO ]  Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;5551234567&amp;#x27;\n2026-04-17 01:06:01,640 [root] [INFO ]  Step 6: Close the &amp;#x27;Callback&amp;#x27; form using the close button\n2026-04-17 01:06:01,640 [root] [INFO ]  Button &amp;#x27;Close side form&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:01,653 [root] [INFO ]  Button &amp;#x27;Close side form&amp;#x27; :: Clicking\n2026-04-17 01:06:02,007 [root] [DEBUG]  No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_callback&amp;#x27;]&amp;#x27; were found in Displayed state\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Verify that &amp;#x27;Services&amp;#x27; and &amp;#x27;Projects&amp;#x27; blocks are displayed on the homepage\nINFO     root:logger.py:30 Step 2: Click the &amp;#x27;Start Cooperation&amp;#x27; button in the &amp;#x27;About Company&amp;#x27; block\nINFO     root:logger.py:30 Button &amp;#x27;Start cooperation&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Start cooperation&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 3: Fill out the &amp;#x27;Start Cooperation&amp;#x27; form with name, phone, service, and message\nINFO     root:logger.py:30 Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Ivan Sidorov&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;5551234567&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;Needed service name&amp;#x27; :: Sending keys &amp;#x27;1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b 8&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User message&amp;#x27; :: Sending keys &amp;#x27;\u0425\u043e\u0447\u0443 \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u043a\u043e\u043d\u0441\u0443\u043b\u044c\u0442\u0430\u0446\u0438\u044e \u043f\u043e \u0432\u043d\u0435\u0434\u0440\u0435\u043d\u0438\u044e 1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b 8&amp;#x27;\nINFO     root:logger.py:30 Step 4: Click the &amp;#x27;Request Callback&amp;#x27; button in the &amp;#x27;Start Cooperation&amp;#x27; form\nINFO     root:logger.py:30 Button &amp;#x27;Callback&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Callback&amp;#x27; :: Clicking\nDEBUG    root:logger.py:40 No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_question&amp;#x27;]&amp;#x27; were found in Displayed state\nINFO     root:logger.py:30 Step 5: Fill out the &amp;#x27;Callback&amp;#x27; form with name and phone\nINFO     root:logger.py:30 Text Field &amp;#x27;User name&amp;#x27; :: Sending keys &amp;#x27;Ivan Sidorov&amp;#x27;\nINFO     root:logger.py:30 Text Field &amp;#x27;User phone number&amp;#x27; :: Sending keys &amp;#x27;5551234567&amp;#x27;\nINFO     root:logger.py:30 Step 6: Close the &amp;#x27;Callback&amp;#x27; form using the close button\nINFO     root:logger.py:30 Button &amp;#x27;Close side form&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Close side form&amp;#x27; :: Clicking\nDEBUG    root:logger.py:40 No elements with locator &amp;#x27;By.XPATH: //form[@name=&amp;#x27;aspro_priority_callback&amp;#x27;]&amp;#x27; were found in Displayed state\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:06:02,007 [root] [INFO ]  Closing browser\n2026-04-17 01:06:02,008 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/no_html_leaks_on_pages/test_no_html_leaks_on_pages.py::TestNoHtmlLeaksOnPages::test_no_html_leaks_on_pages&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_cases/no_html_leaks_on_pages/test_no_html_leaks_on_pages.py::TestNoHtmlLeaksOnPages::test_no_html_leaks_on_pages&#34;, &#34;duration&#34;: &#34;00:00:09&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/no_html_leaks_on_pages/test_no_html_leaks_on_pages.py::TestNoHtmlLeaksOnPages::test_no_html_leaks_on_pages&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:09&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;FAILURE: check not bool(True): HTML leak detected on Services Page: &amp;lt;div\ntest_cases\\no_html_leaks_on_pages\\test_no_html_leaks_on_pages.py:88 in test_no_html_leaks_on_pages() -&amp;gt; SoftAssert.is_false(\n\nFAILURE: check not bool(True): HTML leak detected on Services Page: &amp;lt;p\nFAILURE: check not bool(True): HTML leak detected on Services Page: &amp;lt;a\nFAILURE: check not bool(True): HTML leak detected on Services Page: style=\nFAILURE: check not bool(True): HTML leak detected on Services Page: onmouseover=\nFAILURE: check not bool(True): HTML leak detected on Services Page: onmouseout=\n------------------------------------------------------------\nFailed Checks: 6\n\n---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:06:04,093 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:06:04,595 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:04,955 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:05,312 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:06:05,312 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:06:05,312 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 16160 using 0 to output -3\n2026-04-17 01:06:06,368 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:06:06,368 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:06:06,393 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:06:08,442 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:06:08,451 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 16160 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:06:08,463 [root] [INFO ]  Step 1: Check HTML leaks on Home section\n2026-04-17 01:06:08,620 [root] [INFO ]  Step 2: Navigate to VIVAT-IQ Solutions page and check HTML leaks\n2026-04-17 01:06:08,621 [root] [INFO ]  Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:08,681 [root] [INFO ]  Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Clicking\n2026-04-17 01:06:09,068 [root] [INFO ]  Step 3: Navigate to 1C Solutions page and check HTML leaks\n2026-04-17 01:06:09,068 [root] [INFO ]  Link &amp;#x27;1C Solutions&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:09,079 [root] [INFO ]  Link &amp;#x27;1C Solutions&amp;#x27; :: Clicking\n2026-04-17 01:06:09,336 [root] [INFO ]  Step 4: Navigate to Cart page and check HTML leaks\n2026-04-17 01:06:09,337 [root] [INFO ]  Link &amp;#x27;Cart&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:09,347 [root] [INFO ]  Link &amp;#x27;Cart&amp;#x27; :: Clicking\n2026-04-17 01:06:09,581 [root] [INFO ]  Step 5: Navigate to Projects page and check HTML leaks\n2026-04-17 01:06:09,581 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:09,597 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Clicking\n2026-04-17 01:06:10,145 [root] [INFO ]  Step 6: Navigate to Services page and check HTML leaks\n2026-04-17 01:06:10,145 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:10,155 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Clicking\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Check HTML leaks on Home section\nINFO     root:logger.py:30 Step 2: Navigate to VIVAT-IQ Solutions page and check HTML leaks\nINFO     root:logger.py:30 Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 3: Navigate to 1C Solutions page and check HTML leaks\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 4: Navigate to Cart page and check HTML leaks\nINFO     root:logger.py:30 Link &amp;#x27;Cart&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Cart&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 5: Navigate to Projects page and check HTML leaks\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 6: Navigate to Services page and check HTML leaks\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Clicking\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:06:10,616 [root] [INFO ]  Closing browser\n2026-04-17 01:06:10,616 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/projects_page_load_more/test_projects_page_load_more.py::TestProjectsPageLoadMore::test_projects_page_load_more&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cases/projects_page_load_more/test_projects_page_load_more.py::TestProjectsPageLoadMore::test_projects_page_load_more&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/projects_page_load_more/test_projects_page_load_more.py::TestProjectsPageLoadMore::test_projects_page_load_more&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:06:12,718 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:06:13,179 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:13,565 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:13,927 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:06:13,927 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:06:13,927 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 1152 using 0 to output -3\n2026-04-17 01:06:14,977 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:06:14,977 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:06:15,001 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:06:16,414 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:06:16,417 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 1152 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:06:16,417 [root] [INFO ]  Step 1: Click the &amp;#x27;Projects&amp;#x27; button in the header\n2026-04-17 01:06:16,437 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:16,444 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Clicking\n2026-04-17 01:06:16,894 [root] [INFO ]  Step 2: Verify that projects are displayed on the &amp;#x27;Projects&amp;#x27; page\n2026-04-17 01:06:17,062 [root] [INFO ]  Step 3: Click the &amp;#x27;Load More&amp;#x27; button to load additional projects\n2026-04-17 01:06:17,062 [root] [INFO ]  Button &amp;#x27;Load more projects&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:17,078 [root] [INFO ]  Button &amp;#x27;Load more projects&amp;#x27; :: Clicking\n2026-04-17 01:06:17,742 [root] [DEBUG]  No elements with locator &amp;#x27;By.CLASS_NAME: ajax_load_btn_pagination&amp;#x27; were found in Displayed state\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Click the &amp;#x27;Projects&amp;#x27; button in the header\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 2: Verify that projects are displayed on the &amp;#x27;Projects&amp;#x27; page\nINFO     root:logger.py:30 Step 3: Click the &amp;#x27;Load More&amp;#x27; button to load additional projects\nINFO     root:logger.py:30 Button &amp;#x27;Load more projects&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Button &amp;#x27;Load more projects&amp;#x27; :: Clicking\nDEBUG    root:logger.py:40 No elements with locator &amp;#x27;By.CLASS_NAME: ajax_load_btn_pagination&amp;#x27; were found in Displayed state\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:06:17,965 [root] [INFO ]  Closing browser\n2026-04-17 01:06:17,965 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/services_page_navigation/test_services_page_navigation.py::TestServicesPageNavigation::test_services_page_navigation&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cases/services_page_navigation/test_services_page_navigation.py::TestServicesPageNavigation::test_services_page_navigation&#34;, &#34;duration&#34;: &#34;00:00:08&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/services_page_navigation/test_services_page_navigation.py::TestServicesPageNavigation::test_services_page_navigation&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:08&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:06:20,039 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:06:20,500 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:20,875 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:21,243 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:06:21,243 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:06:21,243 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 20240 using 0 to output -3\n2026-04-17 01:06:22,229 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:06:22,229 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:06:22,251 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:06:23,414 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:06:23,453 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 20240 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:06:23,457 [root] [INFO ]  Step 1: Click the &amp;#x27;Services&amp;#x27; button in the header\n2026-04-17 01:06:23,469 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:23,479 [root] [INFO ]  Link &amp;#x27;Services&amp;#x27; :: Clicking\n2026-04-17 01:06:23,814 [root] [INFO ]  Step 2: Verify the list of services on the &amp;#x27;Services&amp;#x27; page\n2026-04-17 01:06:23,987 [root] [INFO ]  Label &amp;#x27;Service titles + 1&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,053 [root] [INFO ]  Label &amp;#x27;Service titles + 1&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,053 [root] [INFO ]  Label &amp;#x27;Service titles + 2&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,113 [root] [INFO ]  Label &amp;#x27;Service titles + 2&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,113 [root] [INFO ]  Label &amp;#x27;Service titles + 3&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,167 [root] [INFO ]  Label &amp;#x27;Service titles + 3&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,167 [root] [INFO ]  Label &amp;#x27;Service titles + 4&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,222 [root] [INFO ]  Label &amp;#x27;Service titles + 4&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,222 [root] [INFO ]  Label &amp;#x27;Service titles + 5&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,285 [root] [INFO ]  Label &amp;#x27;Service titles + 5&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,285 [root] [INFO ]  Label &amp;#x27;Service titles + 6&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,347 [root] [INFO ]  Label &amp;#x27;Service titles + 6&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,347 [root] [INFO ]  Label &amp;#x27;Service titles + 7&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,394 [root] [INFO ]  Label &amp;#x27;Service titles + 7&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,394 [root] [INFO ]  Label &amp;#x27;Service titles + 8&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,457 [root] [INFO ]  Label &amp;#x27;Service titles + 8&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,457 [root] [INFO ]  Label &amp;#x27;Service titles + 9&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,519 [root] [INFO ]  Label &amp;#x27;Service titles + 9&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,519 [root] [INFO ]  Label &amp;#x27;Service titles + 10&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,566 [root] [INFO ]  Label &amp;#x27;Service titles + 10&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,566 [root] [INFO ]  Label &amp;#x27;Service titles + 11&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,644 [root] [INFO ]  Label &amp;#x27;Service titles + 11&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,644 [root] [INFO ]  Label &amp;#x27;Service titles + 12&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,691 [root] [INFO ]  Label &amp;#x27;Service titles + 12&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,691 [root] [INFO ]  Label &amp;#x27;Service titles + 13&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,753 [root] [INFO ]  Label &amp;#x27;Service titles + 13&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,753 [root] [INFO ]  Label &amp;#x27;Service titles + 14&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,817 [root] [INFO ]  Label &amp;#x27;Service titles + 14&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,817 [root] [INFO ]  Label &amp;#x27;Service titles + 15&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,868 [root] [INFO ]  Label &amp;#x27;Service titles + 15&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,868 [root] [INFO ]  Label &amp;#x27;Service titles + 16&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,915 [root] [INFO ]  Label &amp;#x27;Service titles + 16&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,915 [root] [INFO ]  Label &amp;#x27;Service titles + 17&amp;#x27; :: Getting text from element\n2026-04-17 01:06:24,978 [root] [INFO ]  Label &amp;#x27;Service titles + 17&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:24,978 [root] [INFO ]  Label &amp;#x27;Service titles + 18&amp;#x27; :: Getting text from element\n2026-04-17 01:06:25,040 [root] [INFO ]  Label &amp;#x27;Service titles + 18&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:25,040 [root] [INFO ]  Label &amp;#x27;Service titles + 19&amp;#x27; :: Getting text from element\n2026-04-17 01:06:25,087 [root] [INFO ]  Label &amp;#x27;Service titles + 19&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:25,087 [root] [INFO ]  Label &amp;#x27;Service titles + 20&amp;#x27; :: Getting text from element\n2026-04-17 01:06:25,149 [root] [INFO ]  Label &amp;#x27;Service titles + 20&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:25,149 [root] [INFO ]  Label &amp;#x27;Service titles + 21&amp;#x27; :: Getting text from element\n2026-04-17 01:06:25,212 [root] [INFO ]  Label &amp;#x27;Service titles + 21&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n2026-04-17 01:06:25,212 [root] [INFO ]  Step 3: Click the first service link\n2026-04-17 01:06:25,259 [root] [INFO ]  Link &amp;#x27;Service links + 1&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:25,274 [root] [INFO ]  Link &amp;#x27;Service links + 1&amp;#x27; :: Clicking\n2026-04-17 01:06:25,900 [root] [INFO ]  Step 4: Compare the service name from the list with the name on the service page\n2026-04-17 01:06:25,900 [root] [INFO ]  Label &amp;#x27;Service name&amp;#x27; :: Getting text from element\n2026-04-17 01:06:25,910 [root] [INFO ]  Label &amp;#x27;Service name&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Click the &amp;#x27;Services&amp;#x27; button in the header\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Services&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 2: Verify the list of services on the &amp;#x27;Services&amp;#x27; page\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 1&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 1&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 2&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 2&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 3&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 3&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 4&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 4&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 5&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 5&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 6&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 6&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 7&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 7&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 8&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 8&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 9&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 9&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 10&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 10&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 11&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 11&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 12&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 12&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 13&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 13&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 14&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 14&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 15&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 15&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 16&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 16&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 17&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 17&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 18&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 18&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 19&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 19&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 20&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 20&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 21&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 21&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\nINFO     root:logger.py:30 Step 3: Click the first service link\nINFO     root:logger.py:30 Link &amp;#x27;Service links + 1&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;Service links + 1&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 4: Compare the service name from the list with the name on the service page\nINFO     root:logger.py:30 Label &amp;#x27;Service name&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service name&amp;#x27; :: Element&amp;#x27;s text: [\u041f\u0420\u041e\u0415\u041a\u0422\u042b 1\u0421:ERP \u0423\u041f\u0420\u0410\u0412\u041b\u0415\u041d\u0418\u0415 \u041f\u0420\u0415\u0414\u041f\u0420\u0418\u042f\u0422\u0418\u0415\u041c]\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:06:25,910 [root] [INFO ]  Closing browser\n2026-04-17 01:06:25,910 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/solutions_page/test_solutions_page.py::TestSolutionsPage::test_solutions_page&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_cases/solutions_page/test_solutions_page.py::TestSolutionsPage::test_solutions_page&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/solutions_page/test_solutions_page.py::TestSolutionsPage::test_solutions_page&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:06:28,033 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:06:28,504 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:28,848 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:29,209 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:06:29,209 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:06:29,209 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 19744 using 0 to output -3\n2026-04-17 01:06:29,753 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:06:29,753 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:06:29,787 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:06:30,945 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:06:30,954 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 19744 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:06:30,956 [root] [INFO ]  Step 1: Click the &amp;#x27;1C Solutions&amp;#x27; button in the header\n2026-04-17 01:06:31,001 [root] [INFO ]  Link &amp;#x27;1C Solutions&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:31,022 [root] [INFO ]  Link &amp;#x27;1C Solutions&amp;#x27; :: Clicking\n2026-04-17 01:06:31,248 [root] [INFO ]  Step 2: Verify the list of solutions on the &amp;#x27;1C Solutions&amp;#x27; page\n2026-04-17 01:06:31,338 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 1&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,364 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 1&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u0430\u0434\u0440\u043e\u0432\u044b\u0439 \u0443\u0447\u0435\u0442]\n2026-04-17 01:06:31,365 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 2&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,389 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 2&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u043e\u043c\u043f\u043b\u0435\u043a\u0441\u043d\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f]\n2026-04-17 01:06:31,389 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 3&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,410 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 3&amp;#x27; :: Element&amp;#x27;s text: [\u0411\u0443\u0445\u0433\u0430\u043b\u0442\u0435\u0440\u0441\u043a\u0438\u0439 \u0443\u0447\u0435\u0442]\n2026-04-17 01:06:31,411 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 4&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,432 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 4&amp;#x27; :: Element&amp;#x27;s text: [\u0421\u0435\u0440\u0432\u0438\u0441\u044b 1\u0421]\n2026-04-17 01:06:31,432 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 5&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,454 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 5&amp;#x27; :: Element&amp;#x27;s text: [\u0422\u043e\u0440\u0433\u043e\u0432\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f]\n2026-04-17 01:06:31,454 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 6&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,476 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 6&amp;#x27; :: Element&amp;#x27;s text: [\u0420\u0435\u0448\u0435\u043d\u0438\u044f \u0434\u043b\u044f \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u043e\u0431\u043e\u0440\u043e\u0442\u0430]\n2026-04-17 01:06:31,476 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 7&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,496 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 7&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u043b\u0438\u0435\u043d\u0442\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0435\u043d\u0437\u0438\u0438]\n2026-04-17 01:06:31,497 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 8&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,518 [root] [INFO ]  Label &amp;#x27;1C Solutions titles + 8&amp;#x27; :: Element&amp;#x27;s text: [Data-mobile]\n2026-04-17 01:06:31,518 [root] [INFO ]  Step 3: Click the first solution card, and vrify the product group name\n2026-04-17 01:06:31,567 [root] [INFO ]  Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:31,577 [root] [INFO ]  Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Clicking\n2026-04-17 01:06:31,788 [root] [INFO ]  Label &amp;#x27;1C product group name&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,812 [root] [INFO ]  Label &amp;#x27;1C product group name&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u0430\u0434\u0440\u043e\u0432\u044b\u0439 \u0443\u0447\u0435\u0442]\n2026-04-17 01:06:31,812 [root] [INFO ]  Step 4: Verify the list of products in the group is not empty\n2026-04-17 01:06:31,877 [root] [INFO ]  Label &amp;#x27;Service titles + 1&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,891 [root] [INFO ]  Label &amp;#x27;Service titles + 1&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b \u0433\u043e\u0441\u0443\u0434\u0430\u0440\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0433\u043e \u0443\u0447\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u044f 8]\n2026-04-17 01:06:31,891 [root] [INFO ]  Label &amp;#x27;Service titles + 2&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,905 [root] [INFO ]  Label &amp;#x27;Service titles + 2&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u041f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u043e\u043c 8.]\n2026-04-17 01:06:31,905 [root] [INFO ]  Label &amp;#x27;Service titles + 3&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,917 [root] [INFO ]  Label &amp;#x27;Service titles + 3&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u043e\u043c 8 \u041a\u041e\u0420\u041f]\n2026-04-17 01:06:31,917 [root] [INFO ]  Label &amp;#x27;Service titles + 4&amp;#x27; :: Getting text from element\n2026-04-17 01:06:31,925 [root] [INFO ]  Label &amp;#x27;Service titles + 4&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u041f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u043e\u043c 8. \u0411\u0430\u0437\u043e\u0432\u0430\u044f \u0432\u0435\u0440\u0441\u0438\u044f]\n2026-04-17 01:06:31,925 [root] [INFO ]  Step 5: Click the first product card\n2026-04-17 01:06:31,952 [root] [INFO ]  Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:31,966 [root] [INFO ]  Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Clicking\n2026-04-17 01:06:32,485 [root] [INFO ]  Step 6: Verify the product name\n2026-04-17 01:06:32,485 [root] [INFO ]  Label &amp;#x27;1C product name&amp;#x27; :: Getting text from element\n2026-04-17 01:06:32,512 [root] [INFO ]  Label &amp;#x27;1C product name&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b \u0433\u043e\u0441\u0443\u0434\u0430\u0440\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0433\u043e \u0443\u0447\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u044f 8]\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Click the &amp;#x27;1C Solutions&amp;#x27; button in the header\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 2: Verify the list of solutions on the &amp;#x27;1C Solutions&amp;#x27; page\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 1&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 1&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u0430\u0434\u0440\u043e\u0432\u044b\u0439 \u0443\u0447\u0435\u0442]\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 2&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 2&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u043e\u043c\u043f\u043b\u0435\u043a\u0441\u043d\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f]\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 3&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 3&amp;#x27; :: Element&amp;#x27;s text: [\u0411\u0443\u0445\u0433\u0430\u043b\u0442\u0435\u0440\u0441\u043a\u0438\u0439 \u0443\u0447\u0435\u0442]\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 4&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 4&amp;#x27; :: Element&amp;#x27;s text: [\u0421\u0435\u0440\u0432\u0438\u0441\u044b 1\u0421]\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 5&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 5&amp;#x27; :: Element&amp;#x27;s text: [\u0422\u043e\u0440\u0433\u043e\u0432\u044b\u0435 \u0440\u0435\u0448\u0435\u043d\u0438\u044f]\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 6&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 6&amp;#x27; :: Element&amp;#x27;s text: [\u0420\u0435\u0448\u0435\u043d\u0438\u044f \u0434\u043b\u044f \u0434\u043e\u043a\u0443\u043c\u0435\u043d\u0442\u043e\u043e\u0431\u043e\u0440\u043e\u0442\u0430]\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 7&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 7&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u043b\u0438\u0435\u043d\u0442\u0441\u043a\u0438\u0435 \u043b\u0438\u0446\u0435\u043d\u0437\u0438\u0438]\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 8&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C Solutions titles + 8&amp;#x27; :: Element&amp;#x27;s text: [Data-mobile]\nINFO     root:logger.py:30 Step 3: Click the first solution card, and vrify the product group name\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Label &amp;#x27;1C product group name&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C product group name&amp;#x27; :: Element&amp;#x27;s text: [\u041a\u0430\u0434\u0440\u043e\u0432\u044b\u0439 \u0443\u0447\u0435\u0442]\nINFO     root:logger.py:30 Step 4: Verify the list of products in the group is not empty\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 1&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 1&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b \u0433\u043e\u0441\u0443\u0434\u0430\u0440\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0433\u043e \u0443\u0447\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u044f 8]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 2&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 2&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u041f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u043e\u043c 8.]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 3&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 3&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u043e\u043c 8 \u041a\u041e\u0420\u041f]\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 4&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Service titles + 4&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u041f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u043e\u043c 8. \u0411\u0430\u0437\u043e\u0432\u0430\u044f \u0432\u0435\u0440\u0441\u0438\u044f]\nINFO     root:logger.py:30 Step 5: Click the first product card\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;1C Solutions cards + 1&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 6: Verify the product name\nINFO     root:logger.py:30 Label &amp;#x27;1C product name&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;1C product name&amp;#x27; :: Element&amp;#x27;s text: [1\u0421:\u0417\u0430\u0440\u043f\u043b\u0430\u0442\u0430 \u0438 \u043a\u0430\u0434\u0440\u044b \u0433\u043e\u0441\u0443\u0434\u0430\u0440\u0441\u0442\u0432\u0435\u043d\u043d\u043e\u0433\u043e \u0443\u0447\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u044f 8]\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:06:32,513 [root] [INFO ]  Closing browser\n2026-04-17 01:06:32,513 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}], &#34;tests/test_cases/vivat_solutions_sorting/test_vivat_solutions_sorting.py::TestVivatSolutionsSorting::test_vivat_solutions_sorting&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;tests/test_cases/vivat_solutions_sorting/test_vivat_solutions_sorting.py::TestVivatSolutionsSorting::test_vivat_solutions_sorting&#34;, &#34;duration&#34;: &#34;00:00:07&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_cases/vivat_solutions_sorting/test_vivat_solutions_sorting.py::TestVivatSolutionsSorting::test_vivat_solutions_sorting&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:07&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;FAILURE: check [10000.0, 2000.0, 298000.0, 5160.0, 6000.0] == [2000.0, 5160.0, 6000.0, 10000.0, 298000.0]: Prices are not sorted in ascending order: [10000.0, 2000.0, 298000.0, 5160.0, 6000.0]\ntest_cases\\vivat_solutions_sorting\\test_vivat_solutions_sorting.py:30 in test_vivat_solutions_sorting() -&amp;gt; SoftAssert.equal(\n\nFAILURE: check [6000.0, 5160.0, 298000.0, 2000.0, 10000.0] == [298000.0, 10000.0, 6000.0, 5160.0, 2000.0]: Prices are not sorted in descending order: [6000.0, 5160.0, 298000.0, 2000.0, 10000.0]\n------------------------------------------------------------\nFailed Checks: 2\n\n---------------------------- Captured stderr setup -----------------------------\n2026-04-17 01:06:34,595 [WDM] [INFO ]  ====== WebDriver manager ======\n2026-04-17 01:06:35,062 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:35,437 [WDM] [INFO ]  Get LATEST chromedriver version for google-chrome\n2026-04-17 01:06:35,788 [WDM] [INFO ]  Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\n2026-04-17 01:06:35,788 [selenium.webdriver.common.driver_finder] [DEBUG]  Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\n2026-04-17 01:06:35,788 [selenium.webdriver.common.service] [DEBUG]  Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 10428 using 0 to output -3\n2026-04-17 01:06:36,834 [root] [INFO ]  Browser &amp;#x27;chrome&amp;#x27; ready...\n2026-04-17 01:06:36,834 [root] [INFO ]  Maximizing browser window\n2026-04-17 01:06:36,850 [root] [INFO ]  Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\n2026-04-17 01:06:38,089 [root] [INFO ]  Waiting for page to load\n2026-04-17 01:06:38,102 [root] [INFO ]  Waiting for page to load\n\n------------------------------ Captured log setup ------------------------------\nINFO     WDM:logger.py:11 ====== WebDriver manager ======\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Get LATEST chromedriver version for google-chrome\nINFO     WDM:logger.py:11 Driver [C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe] found in cache\nDEBUG    selenium.webdriver.common.driver_finder:driver_finder.py:60 Skipping Selenium Manager; path to chrome driver specified in Service class: C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe\nDEBUG    selenium.webdriver.common.service:service.py:234 Started executable: `C:\\Users\\Radmir\\.wdm\\drivers\\chromedriver\\win64\\147.0.7727.57\\chromedriver-win32/chromedriver.exe` in a child process with pid: 10428 using 0 to output -3\nINFO     root:logger.py:30 Browser &amp;#x27;chrome&amp;#x27; ready...\nINFO     root:logger.py:30 Maximizing browser window\nINFO     root:logger.py:30 Navigate to URL - &amp;#x27;https://www.vivat-iq.ru/&amp;#x27;\nINFO     root:logger.py:30 Waiting for page to load\nINFO     root:logger.py:30 Waiting for page to load\n\n----------------------------- Captured stderr call -----------------------------\n2026-04-17 01:06:38,102 [root] [INFO ]  Step 1: Click the &amp;#x27;VIVAT-IQ Solutions&amp;#x27; button in the header\n2026-04-17 01:06:38,116 [root] [INFO ]  Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:38,127 [root] [INFO ]  Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Clicking\n2026-04-17 01:06:38,360 [root] [INFO ]  Step 2: Verify the list of solutions on the &amp;#x27;VIVAT-IQ Solutions&amp;#x27; page\n2026-04-17 01:06:38,447 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 1&amp;#x27; :: Getting text from element\n2026-04-17 01:06:38,481 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 1&amp;#x27; :: Element&amp;#x27;s text: [\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442]\n2026-04-17 01:06:38,481 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 2&amp;#x27; :: Getting text from element\n2026-04-17 01:06:38,506 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 2&amp;#x27; :: Element&amp;#x27;s text: [\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u041f\u0420\u041e\u0424]\n2026-04-17 01:06:38,507 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 3&amp;#x27; :: Getting text from element\n2026-04-17 01:06:38,529 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 3&amp;#x27; :: Element&amp;#x27;s text: [\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u044b\u0435 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438]\n2026-04-17 01:06:38,529 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 4&amp;#x27; :: Getting text from element\n2026-04-17 01:06:38,552 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 4&amp;#x27; :: Element&amp;#x27;s text: [\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0438 \u0441\u043f\u043e\u0440\u0442 (\u0414\u041e\u0418\u0421)]\n2026-04-17 01:06:38,552 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 5&amp;#x27; :: Getting text from element\n2026-04-17 01:06:38,573 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 5&amp;#x27; :: Element&amp;#x27;s text: [\u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u0437\u0430\u043a\u0430\u0437\u044b]\n2026-04-17 01:06:38,574 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 6&amp;#x27; :: Getting text from element\n2026-04-17 01:06:38,595 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 6&amp;#x27; :: Element&amp;#x27;s text: [\u0410\u0443\u0434\u0438\u0442 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u043e\u0432 \u0442\u043e\u0432\u0430\u0440\u043e\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u043f\u043e\u0441\u043b\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u044f \u043f\u0435\u0440\u0438\u043e\u0434\u0430]\n2026-04-17 01:06:38,595 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 7&amp;#x27; :: Getting text from element\n2026-04-17 01:06:38,618 [root] [INFO ]  Label &amp;#x27;VIVAT-IQ Solutions titles + 7&amp;#x27; :: Element&amp;#x27;s text: [\u0421\u0438\u0441\u0442\u0435\u043c\u0430 \u043e\u043f\u0435\u0440\u0430\u0442\u0438\u0432\u043d\u043e\u0433\u043e \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u0441\u0435\u0431\u0435\u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c\u044e \u0432 1\u0421 \u0423\u0422 11.5 \u0434\u043b\u044f \u0442\u043e\u0440\u0433\u043e\u0432\u044b\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0439]\n2026-04-17 01:06:38,618 [root] [DEBUG]  \u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442\n2026-04-17 01:06:38,618 [root] [DEBUG]  \u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u041f\u0420\u041e\u0424\n2026-04-17 01:06:38,618 [root] [DEBUG]  \u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u044b\u0435 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438\n2026-04-17 01:06:38,618 [root] [DEBUG]  \u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0438 \u0441\u043f\u043e\u0440\u0442 (\u0414\u041e\u0418\u0421)\n2026-04-17 01:06:38,618 [root] [DEBUG]  \u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u0437\u0430\u043a\u0430\u0437\u044b\n2026-04-17 01:06:38,618 [root] [DEBUG]  \u0410\u0443\u0434\u0438\u0442 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u043e\u0432 \u0442\u043e\u0432\u0430\u0440\u043e\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u043f\u043e\u0441\u043b\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u044f \u043f\u0435\u0440\u0438\u043e\u0434\u0430\n2026-04-17 01:06:38,618 [root] [DEBUG]  \u0421\u0438\u0441\u0442\u0435\u043c\u0430 \u043e\u043f\u0435\u0440\u0430\u0442\u0438\u0432\u043d\u043e\u0433\u043e \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u0441\u0435\u0431\u0435\u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c\u044e \u0432 1\u0421 \u0423\u0422 11.5 \u0434\u043b\u044f \u0442\u043e\u0440\u0433\u043e\u0432\u044b\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0439\n2026-04-17 01:06:38,618 [root] [INFO ]  Step 3: Select sorting by price (lowest first)\n2026-04-17 01:06:38,910 [root] [INFO ]  Link &amp;#x27;sort by price ascending&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:38,926 [root] [INFO ]  Link &amp;#x27;sort by price ascending&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:38,926 [root] [INFO ]  Link &amp;#x27;sort by price ascending&amp;#x27; :: Clicking\n2026-04-17 01:06:39,134 [root] [INFO ]  Label &amp;#x27;Product prices + 1&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,205 [root] [INFO ]  Label &amp;#x27;Product prices + 1&amp;#x27; :: Element&amp;#x27;s text: [10000 \u0440]\n2026-04-17 01:06:39,205 [root] [INFO ]  Label &amp;#x27;Product prices + 2&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,227 [root] [INFO ]  Label &amp;#x27;Product prices + 2&amp;#x27; :: Element&amp;#x27;s text: [2000 \u0440]\n2026-04-17 01:06:39,227 [root] [INFO ]  Label &amp;#x27;Product prices + 3&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,248 [root] [INFO ]  Label &amp;#x27;Product prices + 3&amp;#x27; :: Element&amp;#x27;s text: [298 000]\n2026-04-17 01:06:39,248 [root] [INFO ]  Label &amp;#x27;Product prices + 4&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,280 [root] [INFO ]  Label &amp;#x27;Product prices + 4&amp;#x27; :: Element&amp;#x27;s text: [5160 \u0440]\n2026-04-17 01:06:39,280 [root] [INFO ]  Label &amp;#x27;Product prices + 5&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,300 [root] [INFO ]  Label &amp;#x27;Product prices + 5&amp;#x27; :: Element&amp;#x27;s text: [6000]\n2026-04-17 01:06:39,303 [root] [INFO ]  Step 4: Select sorting by price (highest first)\n2026-04-17 01:06:39,585 [root] [INFO ]  Link &amp;#x27;sort by price descending&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:39,585 [root] [INFO ]  Link &amp;#x27;sort by price descending&amp;#x27; :: Waiting for element to be clickable\n2026-04-17 01:06:39,601 [root] [INFO ]  Link &amp;#x27;sort by price descending&amp;#x27; :: Clicking\n2026-04-17 01:06:39,810 [root] [INFO ]  Label &amp;#x27;Product prices + 1&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,857 [root] [INFO ]  Label &amp;#x27;Product prices + 1&amp;#x27; :: Element&amp;#x27;s text: [6000]\n2026-04-17 01:06:39,857 [root] [INFO ]  Label &amp;#x27;Product prices + 2&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,878 [root] [INFO ]  Label &amp;#x27;Product prices + 2&amp;#x27; :: Element&amp;#x27;s text: [5160 \u0440]\n2026-04-17 01:06:39,878 [root] [INFO ]  Label &amp;#x27;Product prices + 3&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,901 [root] [INFO ]  Label &amp;#x27;Product prices + 3&amp;#x27; :: Element&amp;#x27;s text: [298 000]\n2026-04-17 01:06:39,901 [root] [INFO ]  Label &amp;#x27;Product prices + 4&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,920 [root] [INFO ]  Label &amp;#x27;Product prices + 4&amp;#x27; :: Element&amp;#x27;s text: [2000 \u0440]\n2026-04-17 01:06:39,920 [root] [INFO ]  Label &amp;#x27;Product prices + 5&amp;#x27; :: Getting text from element\n2026-04-17 01:06:39,940 [root] [INFO ]  Label &amp;#x27;Product prices + 5&amp;#x27; :: Element&amp;#x27;s text: [10000 \u0440]\n\n------------------------------ Captured log call -------------------------------\nINFO     root:logger.py:30 Step 1: Click the &amp;#x27;VIVAT-IQ Solutions&amp;#x27; button in the header\nINFO     root:logger.py:30 Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;VIVAT-IQ Solutions&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Step 2: Verify the list of solutions on the &amp;#x27;VIVAT-IQ Solutions&amp;#x27; page\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 1&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 1&amp;#x27; :: Element&amp;#x27;s text: [\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442]\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 2&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 2&amp;#x27; :: Element&amp;#x27;s text: [\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u041f\u0420\u041e\u0424]\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 3&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 3&amp;#x27; :: Element&amp;#x27;s text: [\u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u044b\u0435 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438]\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 4&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 4&amp;#x27; :: Element&amp;#x27;s text: [\u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0438 \u0441\u043f\u043e\u0440\u0442 (\u0414\u041e\u0418\u0421)]\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 5&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 5&amp;#x27; :: Element&amp;#x27;s text: [\u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u0437\u0430\u043a\u0430\u0437\u044b]\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 6&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 6&amp;#x27; :: Element&amp;#x27;s text: [\u0410\u0443\u0434\u0438\u0442 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u043e\u0432 \u0442\u043e\u0432\u0430\u0440\u043e\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u043f\u043e\u0441\u043b\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u044f \u043f\u0435\u0440\u0438\u043e\u0434\u0430]\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 7&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;VIVAT-IQ Solutions titles + 7&amp;#x27; :: Element&amp;#x27;s text: [\u0421\u0438\u0441\u0442\u0435\u043c\u0430 \u043e\u043f\u0435\u0440\u0430\u0442\u0438\u0432\u043d\u043e\u0433\u043e \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u0441\u0435\u0431\u0435\u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c\u044e \u0432 1\u0421 \u0423\u0422 11.5 \u0434\u043b\u044f \u0442\u043e\u0440\u0433\u043e\u0432\u044b\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0439]\nDEBUG    root:logger.py:40 \u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u0421\u0442\u0430\u043d\u0434\u0430\u0440\u0442\nDEBUG    root:logger.py:40 \u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u0430\u044f \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u043e \u0448\u0430\u0431\u043b\u043e\u043d\u0430\u043c Word \u041f\u0420\u041e\u0424\nDEBUG    root:logger.py:40 \u0423\u043d\u0438\u0432\u0435\u0440\u0441\u0430\u043b\u044c\u043d\u044b\u0435 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u0445\u0430\u0440\u0430\u043a\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043a\u0438\nDEBUG    root:logger.py:40 \u0414\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0435 \u043e\u0431\u0440\u0430\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0438 \u0441\u043f\u043e\u0440\u0442 (\u0414\u041e\u0418\u0421)\nDEBUG    root:logger.py:40 \u0410\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0435 \u0437\u0430\u043a\u0430\u0437\u044b\nDEBUG    root:logger.py:40 \u0410\u0443\u0434\u0438\u0442 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u043e\u0432 \u0442\u043e\u0432\u0430\u0440\u043e\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u043f\u043e\u0441\u043b\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u0438\u044f \u043f\u0435\u0440\u0438\u043e\u0434\u0430\nDEBUG    root:logger.py:40 \u0421\u0438\u0441\u0442\u0435\u043c\u0430 \u043e\u043f\u0435\u0440\u0430\u0442\u0438\u0432\u043d\u043e\u0433\u043e \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u0441\u0435\u0431\u0435\u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c\u044e \u0432 1\u0421 \u0423\u0422 11.5 \u0434\u043b\u044f \u0442\u043e\u0440\u0433\u043e\u0432\u044b\u0445 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0439\nINFO     root:logger.py:30 Step 3: Select sorting by price (lowest first)\nINFO     root:logger.py:30 Link &amp;#x27;sort by price ascending&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;sort by price ascending&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;sort by price ascending&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 1&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 1&amp;#x27; :: Element&amp;#x27;s text: [10000 \u0440]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 2&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 2&amp;#x27; :: Element&amp;#x27;s text: [2000 \u0440]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 3&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 3&amp;#x27; :: Element&amp;#x27;s text: [298 000]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 4&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 4&amp;#x27; :: Element&amp;#x27;s text: [5160 \u0440]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 5&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 5&amp;#x27; :: Element&amp;#x27;s text: [6000]\nINFO     root:logger.py:30 Step 4: Select sorting by price (highest first)\nINFO     root:logger.py:30 Link &amp;#x27;sort by price descending&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;sort by price descending&amp;#x27; :: Waiting for element to be clickable\nINFO     root:logger.py:30 Link &amp;#x27;sort by price descending&amp;#x27; :: Clicking\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 1&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 1&amp;#x27; :: Element&amp;#x27;s text: [6000]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 2&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 2&amp;#x27; :: Element&amp;#x27;s text: [5160 \u0440]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 3&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 3&amp;#x27; :: Element&amp;#x27;s text: [298 000]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 4&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 4&amp;#x27; :: Element&amp;#x27;s text: [2000 \u0440]\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 5&amp;#x27; :: Getting text from element\nINFO     root:logger.py:30 Label &amp;#x27;Product prices + 5&amp;#x27; :: Element&amp;#x27;s text: [10000 \u0440]\n\n--------------------------- Captured stderr teardown ---------------------------\n2026-04-17 01:06:39,941 [root] [INFO ]  Closing browser\n2026-04-17 01:06:39,941 [root] [INFO ]  Closing browser\n\n---------------------------- Captured log teardown -----------------------------\nINFO     root:logger.py:30 Closing browser\nINFO     root:logger.py:30 Closing browser&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+[
+  {
+    "user_name": "Oleg Ivanov",
+    "user_phone_number": "1234567890",
+    "needed_service_name": "1С:Комплексная автоматизация 8.",
+    "user_message": "Нужна консультация по услуге 1С:Комплексная автоматизация 8."
+  },
+  {
+    "user_name": "Anna Petrova",
+    "user_phone_number": "9876543210",
+    "needed_service_name": "1С:Бухгалтерия 8",
+    "user_message": "Интересует обучение и настройка 1С:Бухгалтерия 8"
+  },
+  {
+    "user_name": "Ivan Sidorov",
+    "user_phone_number": "5551234567",
+    "needed_service_name": "1С:Зарплата и кадры 8",
+    "user_message": "Хочу получить консультацию по внедрению 1С:Зарплата и кадры 8"
+  }
+]
